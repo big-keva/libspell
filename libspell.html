@@ -1,0 +1,251 @@
+<html>
+<head>
+<title>libspell - библиотека проверки русской, украинской и английской орфографии</title>
+
+<style>
+div.prototype {
+        width: 100%;
+        background: #cccccc;
+        font-weight: bold;
+        font-family: monospace;
+        font-size: 120%;
+        white-space: pre;
+}
+
+div.white {
+        background: #ffffff;
+        font-size: 110%;
+}
+</style>
+
+</head>
+<body>
+<font size="+2"><b><div align=center>
+	libspell - библиотека проверки русской, украинской и английской орфографии
+</div></b></font>
+
+<div align=justify>
+
+<h1>1&nbsp;&nbsp;Описание</h1>
+libspell - распространяемая в исходных текстах библиотека проверки орфографии,
+использующая морфологические анализаторы libmorphrus (mlma32ru), libmorpheng
+(mlma32en) и libmorphukr (mlma32ua), и обеспечивающая дополнительную функциональность
+по подбору кандидатов на замену ошибочно написанного слова ("подсказку").<p>
+При построении списка вариантов замены ошибочно написанного слова анализируются
+следующие предположения:<br>
+<ul>
+	<li>ошибка капитализации (<i>москва</i> вместо <i>Москва</i>);</li>
+	<li>не та буква (<i>яшодица</i> вместо <i>ягодица</i>);</li>
+	<li>пропущенная буква (<i>скотоложтво</i> вместо <i>скотоложство</i>);</li>
+	<li>удвоенная буква (<i>серебрянный</i> вместо <i>серебряный</i>);</li>
+	<li>"опоздавшая" буква (<i>консость</i> вместо <i>косность</i>);</li>
+	<li>"слипшиеся" слова (<i>нашару</i> вместо на <i>шару</i>).</li>
+</ul>
+
+Алгоритм предполагает наличие только одной ошибки в слове, то есть по шаблону
+<i>Овстраллия</i> кандидат на замену </i>Австралия</i> порожден не будет. В то
+же время ошибки капитализации обрабатываются во всех случаях, и по шаблону
+<i>моква</i> вариант </i>Москва</i> будет образован.
+
+<h1>2&nbsp;&nbsp;Реализация</h1>
+Библиотека libspell реализована на языке C и потенциально совместима со всеми
+программно-аппаратными платформами.<p>
+В дальнейших версиях, коли таковые будут востребованы, могут быть реализованы
+специфические для того или иного языка алгоритмы проверки составных слов или
+конверсии символов, как, например, преобразование латинской <b><i>i</i></b>
+(0x69) в кириллическую <b><i>і</i></b> (0xB3) для украинского языка или
+согласование частей составных слов, написанных через дефис, по числу и падежу
+(<i>генерал-лейтенант-инженер</i>).
+
+<h2>2.1&nbsp;&nbsp;&nbsp;Кодовая страница</h2>
+
+При написании библиотеки принималась во внимание возможность использования различных
+кодировок и языков, так что никаких предположений о кодовой странице, равно как
+и о символьном составе языка, не делалось.<p>
+В дальнейшем, если понадобится использование какой-либо фиксированной кодовой
+страницы, будет использоваться 1251 Windows Cyrillic для всех поддерживаемых
+славянских языков, как единственно правильная. KOI8 must die.<p>
+
+<h2>2.2&nbsp;&nbsp;&nbsp;Совместимость</h2>
+
+Сборка и тестирование проводились на платформах Win32 (Microsoft Visual C++),
+FreeBSD (gcc), Linux (gcc). Библиотека не содержит каких-либо данных,
+представление которых может меняться от платформы к платформе, равно как и
+не полагается на использование какой-либо конкретной кодировки.
+
+<h2>2.3&nbsp;&nbsp;&nbsp;Сборка</h2>
+
+Поскольку для сборки libspell необходимы заголовки (headers) морфологических
+анализаторов, следует убедиться, что библиотеки морфологического анализа
+русского, украинского и английского языка установлены.<p>
+libspell распространяется в виде архива .tar.gz, который следует поместить в
+корень всех проектов (тот же каталог, где находится libmorph) и распаковать:<br>
+<code><b>&nbsp;&nbsp;&nbsp;&nbsp;&gt; tar -zxf libspell.tar.gz</b></code><br>
+При такой установке в корне всех проектов будет создана следующая структура
+каталогов:<br>
+<div class='prototype white'>[libspell]
+  [src]
+    spellChecker.c
+    spellCheckerRu.c
+    spellCheckerEn.c
+    spellCheckerUa.c
+  [include]
+    spellChecker.h
+    spellCheckerRu.h
+    spellCheckerEn.h
+    spellCheckerUa.h
+  Makefile
+  Makefile.mak
+  libspell.dsp
+</div>
+Если какого-либо из морфологических анализаторов в наличии нет, следует исключить
+из проекта (Makefile, Makefile.mak или libspell.dsp) перед сборкой соответствующий
+специализированный интерфейс - spellCheckerXX.c.
+
+<h3>2.3.1&nbsp;&nbsp;&nbsp;Сборка на платформах ?NIX</h3>
+
+<ol start="1">
+
+<li>Для сборки проекта следует запустить make или gmake в каталоге libspell.
+Из-за несовместимости этих систем сборки и разницы используемого синтаксиса
+приводятся два make-файла: Makefile для GNU make (gmake) и Makefile.mak.
+<div class='prototype white'>&gt; cd libspell
+&gt; make -f Makefile.mak</div>
+или
+<div class='prototype white'>&gt; cd libspell
+&gt; gmake</div>
+</li>
+
+<li>Если проект libspell или проект libmorph расположены в каталоге,
+отличающемся от корня всех проектов, следует явно указать этот каталог
+при вызове make или gmake:
+<div class='prototype white'>&gt; make -f Makefile.mak ProjectRoot_Directory=/home/keva/Projects</div>
+или
+<div class='prototype white'>&gt; gmake ProjectRoot_Directory=/home/keva/Projects</div>
+</li>
+
+<li>По умолчанию собирается библиотека libspell.a, а все объектные модули
+помещаются в каталог <code><b>[libspell/Release]</b></code>. Для сборки
+отладочной версии, libspell_d.a, следует указать при вызове make или gmake
+параметр <code>_DEBUG=1</code>. В этом случае объектные файлы будут помещены
+в каталог <code><b>[libspell/Debug]</b></code>.
+</ol>
+
+<h3>2.3.2&nbsp;&nbsp;&nbsp;Сборка на платформе Win32</h3>
+
+В комплекте приведен файл проект libspell.dsp для Microsoft Visual Studio.
+Команда Project|Build all собирает 6 различных конфигураций библиотеки в соответствии
+с используемым типом runtime libraries:<br>
+&nbsp;&nbsp;<code>libspell_dmd.lib</code>&nbsp;&ndash;&nbsp;Debug Multithreaded DLL<br>
+&nbsp;&nbsp;<code>libspell_dmr.lib</code>&nbsp;&ndash;&nbsp;Multithreaded DLL<br>
+&nbsp;&nbsp;<code>libspell_smd.lib</code>&nbsp;&ndash;&nbsp;Debug Multithreaded<br>
+&nbsp;&nbsp;<code>libspell_smr.lib</code>&nbsp;&ndash;&nbsp;Multithreaded<br>
+&nbsp;&nbsp;<code>libspell_ssd.lib</code>&nbsp;&ndash;&nbsp;Debug Single-threaded<br>
+&nbsp;&nbsp;<code>libspell_ssr.lib</code>&nbsp;&ndash;&nbsp;Single-threaded<p>
+
+Для сборки другими компиляторами придется сделать проект по образу и подобию
+приведенных, или же воспользоваться make-системой командной строки.
+
+<h1>3&nbsp;&nbsp;Условия использования</h1>
+Поскольку для работы библиотеки необходимы морфологические анализаторы, или
+"машинные морфологии", libspell адресована прежде всего зарегистрированным
+пользователям лингвистических библиотек.<p>
+Тем не менее, libspell распространяется в исходных текстах, а потому может
+использоваться также для ознакомления с одним из вариантов построения алгоритма
+построения "подсказок" для замены слова с ошибкой.<p>
+<i>Лицензировавшим не вполне легальный клон моего русского морфологического
+анализатора (mlma32ru) у компании "МедиаЛингва" - персонально: Проходите мимо!</i>
+
+<h1>4&nbsp;&nbsp;Программный интерфейс</h1>
+
+Для настройки на использование определенного морфологического анализатора
+используется структура &ndash; список методов:<br>
+
+<div class='prototype'>struct  morphomodule
+{
+  short (MLMA_API EXPORT *checkword)( const char*, unsigned short );
+  short (MLMA_API EXPORT *lemmatize)( const char*, unsigned short,
+                                      char*,
+                                      lexeme_t*,
+                                      char*,
+                                      unsigned short,
+                                      unsigned short,
+                                      unsigned short );
+  short (MLMA_API EXPORT *buildform)( const char*,
+                                      lexeme_t,
+                                      unsigned short,
+                                      unsigned char,
+                                      char*,
+                                      unsigned short );
+  short (MLMA_API EXPORT *checkhelp)( const char*,
+                                      char* );
+};</div>
+<p>
+Для настройки библиотеки на проверку русской орфографии следует сформировать
+структуру такого вида:<br>
+
+<div class='prototype'>struct morphomodule morphoRus =
+{
+  mlmaruCheckWord,
+  mlmaruLemmatize,
+  mlmaruBuildForm,
+  mlmaruCheckHelp
+};</div>
+
+<h2>4.1.&nbsp;&nbsp;&nbsp;Проверка орфографии</h2>
+<div class='prototype'>int   spellCheckWord( struct morphomodule*  module,
+                      const char*           pszstr );
+</div>
+Функция проверяет проавописание поданной ASCIIZ-строки pszstr, используя методы
+анализатора, переданные параметром module, и возвращает значение, отличное от нуля,
+если слово корректно, и 0, если слово не опознано по словарю.<p>
+
+<h2>4.2.&nbsp;&nbsp;&nbsp;Варианты замены</h2>
+<div class='prototype'>int   spellCheckHelp( struct morphomodule*  module,
+                      char*                 szbuff,
+                      unsigned              ccbuff,
+                      const char*           pszstr );</div>
+Функция строит возможные варианты замены для слова, представленного строкой
+pszstr, используя методы анализатора, переданные параметром module, и помещает
+их, разделяя нулевым символом, в массив, на который указывает szbuff, максимальной
+размерностью ccbuff.<br>
+Возвращает количество вариантов замены или отрицательное значение в случае
+переполнения указанного массива.
+
+<h2>4.2.&nbsp;&nbsp;&nbsp;Специализированные методы</h2>
+Для трех языков, морфолгические анализаторы для которых доступны, реализованы
+также специализированные методы, несколько упрощающие использование, потому как
+в них структура morphomodule уже заполнена Кевой:
+
+<div class='prototype'>int   spellCheckWordEn( const char*           pszstr );
+int   spellCheckHelpEn( char*                 szbuff,
+                        unsigned              ccbuff,
+                        const char*           pszstr );
+int   spellCheckWordRu( const char*           pszstr );
+int   spellCheckHelpRu( char*                 szbuff,
+                        unsigned              ccbuff,
+                        const char*           pszstr );
+int   spellCheckWordUa( const char*           pszstr );
+int   spellCheckHelpUa( char*                 szbuff,
+                        unsigned              ccbuff,
+                        const char*           pszstr );</div>
+
+</div>
+
+<center>
+
+<!--LiveInternet counter--><script type="text/javascript"><!--
+document.write("<a href='http://www.liveinternet.ru/click' "+
+"target=_blank><img src='http://counter.yadro.ru/hit?t57.6;r"+
+escape(document.referrer)+((typeof(screen)=="undefined")?"":
+";s"+screen.width+"*"+screen.height+"*"+(screen.colorDepth?
+screen.colorDepth:screen.pixelDepth))+";u"+escape(document.URL)+
+";"+Math.random()+
+"' alt='' title='LiveInternet' "+
+"border=0 width=88 height=31><\/a>")//--></script><!--/LiveInternet-->
+
+</center>
+
+</body>
+</html>
+
